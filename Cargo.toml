@@ -1,0 +1,7 @@
+[package]
+name = "pg_migrate"
+version = "0.1.0"
+authors = ["jwdeitch <jwdeitch@gmail.com>"]
+
+[dependencies]
+walkdir = "1"
