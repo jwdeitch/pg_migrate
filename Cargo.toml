@@ -6,3 +6,5 @@ authors = ["jwdeitch <jwdeitch@gmail.com>"]
 [dependencies]
 walkdir = "1"
 clap = "~2.19.0"
+postgres = "0.13"
+dotenv = "0.8"
