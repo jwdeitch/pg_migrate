@@ -32,6 +32,8 @@ fn main() {
     }
 
     if matches.is_present("configure") {
-        println!("CONFIGURE");
+        pg::provision();
+        pg::status();
+        println!("Configured! Try to `pg_migrate up/down`");
     }
 }
