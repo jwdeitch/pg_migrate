@@ -1,5 +1,6 @@
 mod fs;
 mod pg;
+mod diff;
 
 extern crate clap;
 
@@ -20,7 +21,10 @@ fn main() {
         .get_matches();
 
     if matches.is_present("status") {
-        println!("STATUS IS PRESENT");
+        let test = diff::discover_mismatch(fs::walk(".".to_string(), true), pg::status());
+        let test1 = diff::discover_mismatch(pg::status(), fs::walk(".".to_string(), true));
+        println!("{:?}, {:?}", test, test1);
+        pg::status();
     }
 
     if matches.is_present("up") {
@@ -33,7 +37,6 @@ fn main() {
 
     if matches.is_present("configure") {
         pg::provision();
-        pg::status();
         println!("Configured! Try to `pg_migrate up/down`");
     }
 }

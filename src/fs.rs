@@ -1,18 +1,18 @@
 extern crate walkdir;
 
-use pg;
-
-pub fn walk(dir: String, is_up: bool) {
-    for entry in walkdir::WalkDir::new(dir) {
+pub fn walk(dir: String, is_up: bool) -> Vec<String> {
+    let mut all_migration_files: Vec<String> = Vec::new();
+    for entry in walkdir::WalkDir::new(dir).follow_links(true) {
         let entry = entry.unwrap();
 
         if process_file(&entry, &is_up) {
             continue;
         }
-
-        pg::load();
-        println!("{}", entry.path().display());
+//        println!("{}", entry.path().display());
+        all_migration_files.push(entry.file_name().to_str().unwrap().to_string());
     }
+
+    all_migration_files
 }
 
 fn process_file(entry: &walkdir::DirEntry, is_up: &bool) -> bool {

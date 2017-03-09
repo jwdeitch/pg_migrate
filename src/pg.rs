@@ -15,37 +15,36 @@ pub fn load() -> Box<Connection> {
 }
 
 
-pub fn status() {
+pub fn status() -> Vec<String> {
     let conn_ptr = load();
 
-    let is_provisioned = conn_ptr.execute(r#"
-            SELECT case when count(*) > 0 then true else false end FROM pg_tables where schemaname = 'public' and tablename = 'pg_migrate';
-        "#, &[]);
+    let is_provisioned = conn_ptr.query(r#"
+            SELECT filename FROM pg_migrate order by batch desc;
+        "#, &[]).ok().expect("Looks like things haven't been setup yet - try `pg_migrate provision`");
 
-    println!("{:?}", is_provisioned)
+    let num_of_migrations = is_provisioned.len();
 
-//    if is_provisioned.unwrap() {
-//        "Looks like things haven't been setup yet - try `pg_migrate provision`".to_string()
-//    }
+    let mut latest_migrations: Vec<String> = Vec::new();
+    if num_of_migrations > 0 {
+        for row in &is_provisioned {
+            latest_migrations.push(row.get(0))
+        }
+    }
+
+    latest_migrations
 }
 
 pub fn provision() {
-    let success = load().execute(r#"
-    with i as (
-        CREATE TYPE pg_migrate_direction AS ENUM ('up', 'down')
-    )
+    let success = load().batch_execute(r#"
     CREATE TABLE pg_migrate (
         filename       VARCHAR,
-        direction      pg_migrate_direction,
         batch          INT,
         time_performed TIMESTAMP DEFAULT now()
     );
-        "#, &[]);
+        "#);
 
     match success {
         Ok(v) => return,
         Err(e) => println!("Something went wrong: {:?}", e),
     }
-
-
 }
