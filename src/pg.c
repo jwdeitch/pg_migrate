@@ -1,10 +1,20 @@
 #include <libpq-fe.h>
+#include <stdlib.h>
+
+void cleanup(PGconn *connection, PGresult *res) {
+	fprintf(stderr, "%s\n", PQerrorMessage(connection));
+
+	PQclear(res);
+	PQfinish(connection);
+
+	exit(1);
+}
 
 
 PGconn *connect() {
 
 	PGconn *connection;
-	connection = PQconnectionectdb("postgres://postgres@localhost:5432/postgres");
+	connection = PQconnectdb("postgres://postgres@localhost:5432/postgres");
 	PQfinish(connection);
 
 	if (PQstatus(connection) == CONNECTION_BAD) {
@@ -19,24 +29,16 @@ PGconn *connect() {
 	return connection;
 }
 
-char *getStatus() {
-	PGconn *connection = connect();
+char *getStatus(PGconn *connection) {
+//	PGconn *connection = connect();
+
 	PGresult *res = PQexec(connection, "SELECT * FROM pg_migrate");
 
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-		do_exit(connection, res);
+		cleanup(connection, res);
 	}
 
 	PQclear(res);
 
 	return "hello";
-}
-
-void cleanup(PGconn *conn, PGresult *res) {
-	fprintf(stderr, "%s\n", PQerrorMessage(conn));
-
-	PQclear(res);
-	PQfinish(conn);
-
-	exit(1);
 }
