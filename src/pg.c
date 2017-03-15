@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <execinfo.h>
 #include <stdio.h>
+#include <string.h>
 
 void cleanup(PGconn *connection, PGresult *res) {
 	fprintf(stderr, "%s\n", PQerrorMessage(connection));
@@ -29,13 +30,20 @@ PGconn *getConnection(PGconn *connection) {
 	return connection;
 }
 
-char *getStatus(PGconn *connection) {
+char *getLatest(PGconn *connection, int num) {
+	char str[5];
+	sprintf(str, "%d", num);
 
-	PGresult *res = PQexec(connection,
-			"SELECT filename"
+	char* query[1000];
+	strcpy(query, "SELECT filename, batch, to_char(time_performed, 'MM/DD/YY @ HH:MI:SS AM')"
 			" FROM pg_migrate"
 			" ORDER BY batch DESC, time_performed DESC"
-			" LIMIT 20;"
+			" LIMIT ");
+	strcat(query, str);
+	strcat(query, ";");
+
+	PGresult *res = PQexec(connection,
+						   query
 	);
 
 	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
@@ -44,9 +52,10 @@ char *getStatus(PGconn *connection) {
 
 	int rows = PQntuples(res);
 
-	for(int i=0; i<rows; i++) {
-
-		printf("%s\n", PQgetvalue(res, i, 0));
+	printf("Filename | Batch | Time performed\n");
+	printf("------------------------------------\n");
+	for(int i=rows-1; i>-1; i--) {
+		printf("%s | %s | %s\n", PQgetvalue(res, i, 0), PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
 	}
 
 	PQclear(res);
