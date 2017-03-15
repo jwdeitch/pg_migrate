@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "pg.h"
-
+#include "fs.h"
 
 int main(int argc, char *argv[]) {
 
@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
 
 	PGconn *connection = getConnection(uninit_connection);
 	getLatest(connection, 10);
+	scan(".");
 
 	return 1;
 }
