@@ -12,6 +12,7 @@ int main(int argc, char *argv[]) {
 	PGconn *uninit_connection;
 
 	PGconn *connection = getConnection(uninit_connection);
+	getStatus(connection);
 //	char* status = getStatus(connection);
 //
 //	printf("%s", status);

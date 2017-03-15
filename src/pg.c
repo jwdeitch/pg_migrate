@@ -30,12 +30,23 @@ PGconn *getConnection(PGconn *connection) {
 }
 
 char *getStatus(PGconn *connection) {
-//	PGconn *connection = connect();
 
-	PGresult *res = PQexec(connection, "SELECT * FROM pg_migrate");
+	PGresult *res = PQexec(connection,
+			"SELECT filename"
+			" FROM pg_migrate"
+			" ORDER BY batch DESC, time_performed DESC"
+			" LIMIT 20;"
+	);
 
-	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 		cleanup(connection, res);
+	}
+
+	int rows = PQntuples(res);
+
+	for(int i=0; i<rows; i++) {
+
+		printf("%s\n", PQgetvalue(res, i, 0));
 	}
 
 	PQclear(res);
