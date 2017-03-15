@@ -1,5 +1,7 @@
 #include <libpq-fe.h>
 #include <stdlib.h>
+#include <execinfo.h>
+#include <stdio.h>
 
 void cleanup(PGconn *connection, PGresult *res) {
 	fprintf(stderr, "%s\n", PQerrorMessage(connection));
@@ -11,13 +13,11 @@ void cleanup(PGconn *connection, PGresult *res) {
 }
 
 
-PGconn *connect() {
+PGconn *getConnection(PGconn *connection) {
 
-	PGconn *connection;
-	connection = PQconnectdb("postgres://postgres@localhost:5432/postgres");
-	PQfinish(connection);
+	connection = PQconnectdb("postgres://postgres:1234@localhost:5432/postgres");
 
-	if (PQstatus(connection) == CONNECTION_BAD) {
+	if (PQstatus(connection) != CONNECTION_OK) {
 
 		fprintf(stderr, "Connection to database failed: %s\n",
 				PQerrorMessage(connection));

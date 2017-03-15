@@ -3,6 +3,7 @@
 #include <libpq-fe.h>
 
 void cleanup(PGconn *connection, PGresult *res);
-PGconn *connect();
+PGconn *getConnection(PGconn *connection);
+char *getStatus(PGconn *connection);
 
 #endif //PG_MIGRATE_PG_H

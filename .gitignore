@@ -2,3 +2,5 @@ target
 .idea
 pg_migrate.iml
 cmake-build-debug
+*.out
+*.gch
