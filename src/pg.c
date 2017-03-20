@@ -34,7 +34,7 @@ char *getLatest(PGconn *connection, int num) {
 	char str[5];
 	sprintf(str, "%d", num);
 
-	char* query[1000];
+	char *query[1000];
 	strcpy(query, "SELECT filename, batch, to_char(time_performed, 'MM/DD/YY @ HH:MI:SS AM')"
 			" FROM pg_migrate"
 			" ORDER BY batch DESC, time_performed DESC"
@@ -54,11 +54,34 @@ char *getLatest(PGconn *connection, int num) {
 
 	printf("Filename | Batch | Time performed\n");
 	printf("------------------------------------\n");
-	for(int i=rows-1; i>-1; i--) {
+	for (int i = rows - 1; i > -1; i--) {
 		printf("%s | %s | %s\n", PQgetvalue(res, i, 0), PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
 	}
 
 	PQclear(res);
+}
 
-	return "hello";
+
+void getUpMigrations(PGconn *connection) {
+	PGresult *res = PQexec(connection,
+			"SELECT *"
+			" FROM ("
+			" SELECT filename"
+			" FROM pg_migrate"
+			" LIMIT 20) AS subq"
+			" WHERE right(subq.filename, 7) = '-up.sql';");
+
+	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+		cleanup(connection, res);
+	}
+
+	int rows = PQntuples(res);
+
+	printf("Filename\n");
+	printf("------------------------------------\n");
+	for (int i = rows - 1; i > -1; i--) {
+		printf("%s\n", PQgetvalue(res, i, 0));
+	}
+
+	PQclear(res);
 }

@@ -12,9 +12,9 @@ int main(int argc, char *argv[]) {
 	PGconn *uninit_connection;
 
 	PGconn *connection = getConnection(uninit_connection);
-	getLatest(connection, 10);
-	scan(".");
-
+//	getLatest(connection, 10);
+//	scan(".");
+	getUpMigrations(connection);
 	return 1;
 }
 

@@ -3,15 +3,17 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+struct fs_discovered_migrations *file_names_arr;
+int *itr;
+
 //http://stackoverflow.com/a/37188697/4603498
-int string_ends_with(const char * str, const char * suffix)
-{
+int string_ends_with(const char *str, const char *suffix) {
 	int str_len = strlen(str);
 	int suffix_len = strlen(suffix);
 
 	return
 			(str_len >= suffix_len) &&
-			(0 == strcmp(str + (str_len-suffix_len), suffix));
+			(0 == strcmp(str + (str_len - suffix_len), suffix));
 }
 
 
@@ -25,9 +27,6 @@ void listdir(const char *name, int level) {
 	if (!(entry = readdir(dir)))
 		return;
 
-	struct file_name* file_names_arr;
-	file_names_arr = calloc(1000, sizeof(file_names_arr));
-
 	do {
 		if (entry->d_type == DT_DIR) {
 			char path[1024];
@@ -37,11 +36,19 @@ void listdir(const char *name, int level) {
 				continue;
 			}
 			listdir(path, level + 1);
-		} else{
+		} else {
+			char *path[PATH_MAX];
+			strcpy(path, name);
+			strcat(path, "/");
+			strcat(path, entry->d_name);
 			if (string_ends_with(entry->d_name, "-down.sql")) {
-				printf("%s/%s\n", name, entry->d_name);
+				file_names_arr[*itr].up = true;
+				strcpy(file_names_arr[*itr].name, *path);
+				*itr = *itr + 1;
 			} else if (string_ends_with(entry->d_name, "-up.sql")) {
-				printf("%s/%s\n", name, entry->d_name);
+				file_names_arr[*itr].up = false;
+				strcpy(file_names_arr[*itr].name, path);
+				*itr = *itr + 1;
 			}
 		}
 
@@ -50,8 +57,13 @@ void listdir(const char *name, int level) {
 }
 
 
-struct file_names *scan(const char *dir) {
-
+struct fs_discovered_migrations *scan(const char *dir) {
+	file_names_arr = calloc(1000, sizeof(*file_names_arr));
+	itr = calloc(1000, sizeof(int));
+	*itr = 0;
 	listdir(".", 15);
+	for (int x = 0; x < *itr; x++) {
+		printf("%s -- %d", file_names_arr[x].name, file_names_arr[x].up);
+	}
 
 }

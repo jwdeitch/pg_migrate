@@ -4,11 +4,11 @@
 #include <linux/limits.h>
 #include <stdbool.h>
 
-struct file_names {
+struct fs_discovered_migrations {
 	char name[PATH_MAX];
 	bool up;
 };
 
-struct file_names* scan(const char* dir);
+struct fs_discovered_migrations* scan(const char* dir);
 
 #endif //PG_MIGRATE_FS_H
