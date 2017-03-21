@@ -57,13 +57,12 @@ void listdir(const char *name, int level) {
 }
 
 
-struct fs_discovered_migrations *scan(const char *dir) {
+struct fs_discovered_migrations *getMigrationsFromFs(const char *dir) {
 	file_names_arr = calloc(1000, sizeof(*file_names_arr));
 	itr = calloc(1000, sizeof(int));
 	*itr = 0;
 	listdir(".", 15);
-	for (int x = 0; x < *itr; x++) {
-		printf("%s -- %d", file_names_arr[x].name, file_names_arr[x].up);
-	}
+	strcpy(file_names_arr[*itr].name, "\0");
+	return file_names_arr;
 
 }

@@ -5,6 +5,6 @@
 void cleanup(PGconn *connection, PGresult *res);
 PGconn *getConnection(PGconn *connection);
 char *getLatest(PGconn *connection, int num);
-char *getUpMigrations(PGconn *connection);
+char *getMigrationsFromDb(PGconn *connection);
 
 #endif //PG_MIGRATE_PG_H

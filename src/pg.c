@@ -3,6 +3,7 @@
 #include <execinfo.h>
 #include <stdio.h>
 #include <string.h>
+#include <dirent.h>
 
 void cleanup(PGconn *connection, PGresult *res) {
 	fprintf(stderr, "%s\n", PQerrorMessage(connection));
@@ -62,14 +63,8 @@ char *getLatest(PGconn *connection, int num) {
 }
 
 
-void getUpMigrations(PGconn *connection) {
-	PGresult *res = PQexec(connection,
-			"SELECT *"
-			" FROM ("
-			" SELECT filename"
-			" FROM pg_migrate"
-			" LIMIT 20) AS subq"
-			" WHERE right(subq.filename, 7) = '-up.sql';");
+char **getMigrationsFromDb(PGconn *connection) {
+	PGresult *res = PQexec(connection, "SELECT filename FROM pg_migrate");
 
 	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 		cleanup(connection, res);
@@ -77,11 +72,21 @@ void getUpMigrations(PGconn *connection) {
 
 	int rows = PQntuples(res);
 
-	printf("Filename\n");
-	printf("------------------------------------\n");
-	for (int i = rows - 1; i > -1; i--) {
-		printf("%s\n", PQgetvalue(res, i, 0));
+	char **list = malloc(1000 * sizeof(char *));
+	if (list == NULL) {
+		PQfinish(connection);
+		exit(1);
 	}
 
+	int i = 0;
+	for (i; i < rows; i++) {
+		list[i] = (char *)malloc(PATH_MAX + 1);
+		strcpy(list[i], strdup(PQgetvalue(res, i, 0)));
+	}
+	list[i+1] = (char *)malloc(PATH_MAX + 1);
+	strcpy(list[i+1],"\0");
+
 	PQclear(res);
+
+	return list;
 }

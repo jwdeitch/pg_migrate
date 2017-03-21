@@ -9,6 +9,6 @@ struct fs_discovered_migrations {
 	bool up;
 };
 
-struct fs_discovered_migrations* scan(const char* dir);
+struct fs_discovered_migrations* getMigrationsFromFs(const char *dir);
 
 #endif //PG_MIGRATE_FS_H
