@@ -2,25 +2,21 @@
 #include "fs.h"
 
 const char* missing_from_fs(char ** dbList, struct fs_discovered_migrations* fsList){
-	int i = 0;
+	int dbi = 0;
+	int fsi = 0;
 
-//	while (dbList[i] != '\0') {
-//
-//		printf("%s\n", dbList[i]);
-//
-//		i++;
-//	}
+	while (dbList[dbi] != '\0') {
 
+		printf("%s\n", dbList[dbi]);
 
-//	printf(fsList[i].name);
+		dbi++;
+	}
 
-//	while (fsList[i].name != "\0") {
-//		printf(fsList[i].name);
-//
-//		i++;
-//	}
-//
-//
+	while (strcmp(fsList[fsi].name,"\0")) {
+		printf("%s\n", fsList[fsi].name);
+
+		fsi++;
+	}
 }
 
 
