@@ -93,6 +93,18 @@ char **getMigrationsFromDb(PGconn *connection) {
 char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 
 	int i = 0;
+	PGresult *batchRes = PQexec(connection, "select max(batch) + 1 as batch from pg_migrate");
+
+	if (PQresultStatus(batchRes) != PGRES_TUPLES_OK) {
+		cleanup(connection, batchRes);
+	}
+
+	char* latestBatch = PQgetvalue(batchRes, 0, 0);
+
+	if (strcmp(latestBatch,"0")) {
+		latestBatch = (char*)"1\n";
+	}
+
 	while (strcmp(migrationsToBeRan[i], "\0") != 0) {
 		FILE *f = fopen(migrationsToBeRan[i], "rb");
 		fseek(f, 0, SEEK_END);
@@ -116,6 +128,14 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 			printf("\nFILE: %s\n", migrationsToBeRan[i]);
 			cleanup(connection, res);
+		}
+
+		char *query[PATH_MAX + 100];
+		sprintf(query, "INSERT INTO pg_migrate (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i], latestBatch);
+		PGresult *pgMigrateInsert = PQexec(connection, query);
+
+		if (PQresultStatus(pgMigrateInsert) != PGRES_TUPLES_OK) {
+			cleanup(connection, pgMigrateInsert);
 		}
 
 		printf("Migrated: %s\n", migrationsToBeRan[i]);

@@ -4,3 +4,4 @@ pg_migrate.iml
 cmake-build-debug
 *.out
 *.gch
+pg_migrate
