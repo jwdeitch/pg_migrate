@@ -1,7 +1,7 @@
 #include <libpq-fe.h>
 #include <stdlib.h>
-#include <execinfo.h>
 #include <stdio.h>
+#include <execinfo.h>
 #include <string.h>
 #include <dirent.h>
 
@@ -43,9 +43,7 @@ char *getLatest(PGconn *connection, int num) {
 	strcat(query, str);
 	strcat(query, ";");
 
-	PGresult *res = PQexec(connection,
-						   query
-	);
+	PGresult *res = PQexec(connection, query);
 
 	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 		cleanup(connection, res);
@@ -91,25 +89,35 @@ char **getMigrationsFromDb(PGconn *connection) {
 	return list;
 }
 
-
+// http://stackoverflow.com/a/14002993/4603498
 char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 
 	int i = 0;
-//	printf("%s -- %d\n", migrationsToBeRan[i], strcmp(migrationsToBeRan[i], "\0"));
 	while (strcmp(migrationsToBeRan[i], "\0") != 0) {
-//		FILE *f = fopen(migrationsToBeRan[i], "rb");
-//		fseek(f, 0, SEEK_END);
-//		long fsize = ftell(f);
-//		fseek(f, 0, SEEK_SET);  //same as rewind(f);
-//
-//		char *string = malloc(fsize + 1);
-//		fread(string, fsize, 1, f);
-//		fclose(f);
-//
-//		string[fsize] = 0;
-//
-//
-		printf("%s\n", migrationsToBeRan[i]);
+		FILE *f = fopen(migrationsToBeRan[i], "rb");
+		fseek(f, 0, SEEK_END);
+		long fsize = ftell(f);
+		fseek(f, 0, SEEK_SET);  //same as rewind(f);
+
+		if (fsize == 0) {
+			printf("skipping %s - seems the file is empty\n", migrationsToBeRan[i]);
+			continue;
+		}
+
+		char *fileContents = malloc(fsize + 1);
+		fread(fileContents, fsize, 1, f);
+		fclose(f);
+
+		fileContents[fsize] = 0;
+
+
+		PGresult *res = PQexec(connection,fileContents);
+
+		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+			cleanup(connection, res);
+		}
+
+		printf("Migrated -- %s\n", migrationsToBeRan[i]);
 		i++;
 	}
 
