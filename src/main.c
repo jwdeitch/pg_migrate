@@ -2,6 +2,7 @@
 #include "pg.h"
 #include "fs.h"
 #include "diff.h"
+
 int main(int argc, char *argv[]) {
 
 	if (argc != 2) {
@@ -13,7 +14,9 @@ int main(int argc, char *argv[]) {
 
 	PGconn *connection = getConnection(uninit_connection);
 //	getLatest(connection, 10);
-	missing_from_fs(getMigrationsFromDb(connection),getMigrationsFromFs("."));
+	char** toBeRan = missing_from_fs(getMigrationsFromDb(connection),getMigrationsFromFs("."));
+
+	runMigrations(connection, toBeRan);
 	return 1;
 }
 

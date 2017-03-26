@@ -6,5 +6,6 @@ void cleanup(PGconn *connection, PGresult *res);
 PGconn *getConnection(PGconn *connection);
 char *getLatest(PGconn *connection, int num);
 char *getMigrationsFromDb(PGconn *connection);
+char *runMigrations(PGconn *connection, char** migrationsToBeRan);
 
 #endif //PG_MIGRATE_PG_H
