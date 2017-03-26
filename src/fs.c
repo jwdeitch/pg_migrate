@@ -42,12 +42,12 @@ void listdir(const char *name, int level) {
 			strcat(path, "/");
 			strcat(path, entry->d_name);
 			if (string_ends_with(entry->d_name, "-down.sql")) {
-				file_names_arr[*itr].up = true;
-				strcpy(file_names_arr[*itr].name, *path);
+				file_names_arr[*itr].up = false;
+				realpath(path, file_names_arr[*itr].name);
 				*itr = *itr + 1;
 			} else if (string_ends_with(entry->d_name, "-up.sql")) {
-				file_names_arr[*itr].up = false;
-				strcpy(file_names_arr[*itr].name, path);
+				file_names_arr[*itr].up = true;
+				realpath(path, file_names_arr[*itr].name);
 				*itr = *itr + 1;
 			}
 		}

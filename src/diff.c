@@ -20,12 +20,11 @@ char **missing_from_fs(char **dbList, struct fs_discovered_migrations *fsList) {
 			list[filesLocated] = (char *) malloc(PATH_MAX + 1);
 			strcpy(list[filesLocated], fsList[fsi].name);
 			filesLocated++;
-//			printf("FOUND %s \n", fsList[fsi].name);
 		}
 		fsi++;
 	}
-	list[filesLocated+1] = (char *)malloc(PATH_MAX + 1);
-	strcpy(list[filesLocated+1],"\0");
+	list[filesLocated] = (char *)malloc(PATH_MAX + 1);
+	strcpy(list[filesLocated],"\0");
 	return list;
 
 }
