@@ -10,13 +10,20 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	PGconn *uninit_connection;
+	PGconn *connection;
+	connection = getConnection(connection);
 
-	PGconn *connection = getConnection(uninit_connection);
 //	getLatest(connection, 10);
-	char** toBeRan = missing_from_fs(getMigrationsFromDb(connection),getMigrationsFromFs("."));
+//	exit(0);
 
-	runMigrations(connection, toBeRan);
+	char** migrationToBeRan = missing_from_fs(getMigrationsFromDb(connection),getMigrationsFromFs("."));
+
+	if (strcmp(migrationToBeRan[0], "\0") == 0) {
+		printf("Nothing to migrate\n");
+		exit(0);
+	}
+
+	runMigrations(connection, migrationToBeRan);
 	return 1;
 }
 
