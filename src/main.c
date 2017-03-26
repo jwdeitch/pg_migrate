@@ -13,8 +13,8 @@ int main(int argc, char *argv[]) {
 	PGconn *connection;
 	connection = getConnection(connection);
 
-//	getLatest(connection, 10);
-//	exit(0);
+	getLatest(connection, 10);
+	exit(0);
 
 	char** migrationToBeRan = missing_from_fs(getMigrationsFromDb(connection),getMigrationsFromFs("."));
 

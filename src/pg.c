@@ -51,10 +51,16 @@ char *getLatest(PGconn *connection, int num) {
 
 	int rows = PQntuples(res);
 
-	printf("Filename | Batch | Time performed\n");
-	printf("------------------------------------\n");
+	int t_length = 0;
+	for (int j = rows - 1; j > -1; j--) {
+		int length = strlen(PQgetvalue(res, j, 0));
+		if (length > t_length) {
+			t_length = length;
+		}
+	}
+	printf("%*s Filename %*s  |  Batch  |      Time Performed\n", (t_length/2)-4, "", (t_length/2)-7, "");
 	for (int i = rows - 1; i > -1; i--) {
-		printf("%s | %s | %s\n", PQgetvalue(res, i, 0), PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
+		printf("%s |    %s    | %s\n", PQgetvalue(res, i, 0), PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
 	}
 
 	PQclear(res);
