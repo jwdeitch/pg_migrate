@@ -100,7 +100,8 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 		fseek(f, 0, SEEK_SET);  //same as rewind(f);
 
 		if (fsize == 0) {
-			printf("skipping %s - seems the file is empty\n", migrationsToBeRan[i]);
+			printf("Skipping: %s - file is empty\n", migrationsToBeRan[i]);
+			i++;
 			continue;
 		}
 
@@ -110,15 +111,18 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 
 		fileContents[fsize] = 0;
 
-
 		PGresult *res = PQexec(connection,fileContents);
 
 		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+			printf("\nFILE: %s\n", migrationsToBeRan[i]);
 			cleanup(connection, res);
 		}
 
-		printf("Migrated -- %s\n", migrationsToBeRan[i]);
+		printf("Migrated: %s\n", migrationsToBeRan[i]);
+		free(fileContents);
 		i++;
 	}
+
+	printf("\nFinished\n");
 
 }
