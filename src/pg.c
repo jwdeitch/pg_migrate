@@ -125,16 +125,20 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 
 		PGresult *res = PQexec(connection,fileContents);
 
-		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+		if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
 			printf("\nFILE: %s\n", migrationsToBeRan[i]);
 			cleanup(connection, res);
 		}
 
-		char *query[PATH_MAX + 100];
-		sprintf(query, "INSERT INTO pg_migrate (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i], latestBatch);
-		PGresult *pgMigrateInsert = PQexec(connection, query);
+		/*
+		 *  TODO: consider concatenating this to the end of the users input
+		 *  to provide transactional support of inserting the migration record
+		 */
+		char *insertQuery[PATH_MAX + 100];
+		sprintf(insertQuery, "INSERT INTO pg_migrate (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i], latestBatch);
+		PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
 
-		if (PQresultStatus(pgMigrateInsert) != PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
 			cleanup(connection, pgMigrateInsert);
 		}
 
