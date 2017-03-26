@@ -94,13 +94,12 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 
 	int i = 0;
 	PGresult *batchRes = PQexec(connection, "select max(batch) + 1 as batch from pg_migrate");
-
 	if (PQresultStatus(batchRes) != PGRES_TUPLES_OK) {
 		cleanup(connection, batchRes);
 	}
 
 	char* latestBatch = PQgetvalue(batchRes, 0, 0);
-
+	PQclear(batchRes);
 	if (strcmp(latestBatch,"0")) {
 		latestBatch = (char*)"1\n";
 	}
@@ -124,11 +123,11 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 		fileContents[fsize] = 0;
 
 		PGresult *res = PQexec(connection,fileContents);
-
 		if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
 			printf("\nFILE: %s\n", migrationsToBeRan[i]);
 			cleanup(connection, res);
 		}
+		PQclear(res);
 
 		/*
 		 *  TODO: consider concatenating this to the end of the users input
@@ -141,6 +140,7 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 		if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
 			cleanup(connection, pgMigrateInsert);
 		}
+		PQclear(pgMigrateInsert);
 
 		printf("Migrated: %s\n", migrationsToBeRan[i]);
 		free(fileContents);
