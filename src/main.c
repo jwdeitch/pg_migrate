@@ -1,35 +1,148 @@
 #include <stdio.h>
+#include <dirent.h>
+#include <unistd.h>
 #include "pg.h"
 #include "fs.h"
 #include "diff.h"
 
-int main(int argc, char *argv[]) {
+void printHelp();
 
-	if (argc != 2) {
-		printf("Looks like you either didn't provide a postgres path, or you provided an additional argument.");
-		return 0;
+int main(int argc, char *argv[]) {
+	extern char *optarg;
+	extern int optind, opterr, optopt;
+
+	/*
+	 * s-status, H-Host, u-up, d-down, v-version, p-soft, g-provision, h-help
+	 */
+	int c = 0, u = 0, d = 0, s = 0, g = 0, p = 0, H = 0, err = 0;
+	char *connStr = malloc(PATH_MAX);
+
+	printf("%i -- \n",  getopt(argc, argv, "sH:udvhp"));
+
+	while ((c = getopt(argc, argv, "sH:udvhp")) != -1) {
+//		printf("%s -- \n", c);
+		switch (c) {
+			case 'd':
+				if (d == 1 || u == 1) {
+					printf("invalid flag entry\n");
+					exit(1);
+				}
+				d = 1;
+				break;
+			case 'p':
+				if (d == 1) {
+					printf("duplicate -p flag\n");
+					exit(1);
+				}
+				p = 1;
+				break;
+			case 'H':
+				if (H == 1) {
+					printf("duplicate -H flag\n");
+					exit(1);
+				}
+				H = 1;
+				connStr = optarg;
+				break;
+			case 'v':
+				printf("pg_migrate version 0.0.1\n");
+				exit(0);
+			case 'u':
+				if (d == 1 || u == 1) {
+					printf("invalid flag entry\n");
+					exit(1);
+				}
+				u = 1;
+				break;
+			case 's':
+				if (s == 1) {
+					printf("duplicate -s flag");
+				}
+				s = 1;
+				break;
+			case 'g':
+				if (g == 1) {
+					printf("duplicate -g flag");
+				}
+				g = 1;
+				break;
+			case 'h':
+				printHelp();
+				exit(1);
+		}
+	}
+
+	if (H == 0) {
+		printf("No Host url argument provided\n");
+		return 1;
 	}
 
 	PGconn *connection;
 	connection = getConnection(connection);
 
-//	getLatest(connection, 10);
-//	exit(0);
-
-//	char** migrationToBeRan = missing_from_db(getMigrationsFromDb(connection),getMigrationsFromFs("."));
-//
-//	if (strcmp(migrationToBeRan[0], "\0") == 0) {
-//		printf("Nothing to migrate\n");
-//		exit(0);
-//	}
-
-//	runMigrations(connection, migrationToBeRan);
-//	rollbackMigrations(connection);
-	if (checkIfSetup(connection) == 0) {
-		printf("ERROR: pg_migrate table not found in public schema\nRun `pg_migrate setup`");
+	if (g == 1) {
+		setup(connection);
+		return 1;
 	}
+
+	if (u + d == 0) {
+		printf("Unspecified migration direction: up or down\n");
+		return 1;
+	}
+
+	if (s) {
+		if (checkIfSetup(connection) == 0) {
+			printf("ERROR: pg_migrate table not found in public schema\nRun `pg_migrate setup`\n");
+			return 2;
+		}
+		getLatest(connection, 10);
+		return 1;
+	}
+
+	if (d) {
+		rollbackMigrations(connection);
+		return 1;
+	}
+
+	if (u) {
+		char *file = argv[optind];
+		char path[PATH_MAX];
+		realpath(path, file);
+		DIR* dir = opendir(path);
+		if (!dir) {
+			fprintf(stderr, "No valid directory provided\n");
+		}
+		closedir(dir);
+//		if (getcwd(cwd, sizeof(cwd)) == NULL) {
+//			perror("getcwd() error\n");
+//		}
+		char **migrationToBeRan = missing_from_db(getMigrationsFromDb(connection), getMigrationsFromFs(path));
+		if (strcmp(migrationToBeRan[0], "\0") == 0) {
+			printf("Nothing to migrate\n");
+			return 1;
+		}
+		runMigrations(connection, migrationToBeRan);
+	}
+
 	return 1;
 }
 
+void printHelp() {
 
+	printf("pg_migrate 0.0.1\n"
+			"https://github.com/jwdeitch/pg_migrate\n"
+			"MIT 2017\n\n"
+
+			"usage: pg_migrate -H [options]... dir\n\n"
+
+		"   -H        Host\n"
+		"   -s        Show last 10 forward migrations ran\n"
+		"   -u        Migrate forward. Recursively traverses provided directory for -up.sql files\n"
+		"   -d        Migrate rollback. Will attempt to locate matching -down.sql files to migrate backwards\n"
+		"   -p        Soft run. Will display migrations to be ran / rolled back\n"
+		"   -g        Provisions the public schema with the pg_migrate table, used to track migrations\n"
+
+	);
+
+}
 
