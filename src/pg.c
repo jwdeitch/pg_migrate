@@ -103,7 +103,7 @@ char **getMigrationsFromDb(PGconn *connection) {
 }
 
 // http://stackoverflow.com/a/14002993/4603498
-char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
+char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simulate) {
 
 	int i = 0;
 	PGresult *batchRes = PQexec(connection, "select max(batch) + 1 as batch from pg_migrate");
@@ -123,40 +123,45 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 		long fsize = ftell(f);
 		fseek(f, 0, SEEK_SET);
 
-		if (fsize == 0) {
-			printf("Skipping (file is empty): %s\n", migrationsToBeRan[i]);
-			i++;
-			continue;
+		if (should_simulate == 0) {
+			if (fsize == 0) {
+				printf("Skipping (file is empty): %s\n", migrationsToBeRan[i]);
+				i++;
+				continue;
+			}
+
+			char *fileContents = malloc(fsize + 1);
+			fread(fileContents, fsize, 1, f);
+			fclose(f);
+
+			fileContents[fsize] = 0;
+
+			PGresult *res = PQexec(connection, fileContents);
+			if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
+				printf("\nFILE: %s\n", migrationsToBeRan[i]);
+				cleanup(connection, res);
+			}
+			PQclear(res);
+
+			/*
+			 *  TODO: consider concatenating this to the end of the users input
+			 *  to provide transactional support of inserting the migration record
+			 */
+			char *insertQuery[PATH_MAX + 100];
+			sprintf(insertQuery, "INSERT INTO pg_migrate (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i],
+					latestBatch);
+			PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
+
+			if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
+				cleanup(connection, pgMigrateInsert);
+			}
+			PQclear(pgMigrateInsert);
+
+			printf("Migrated: %s\n", migrationsToBeRan[i]);
+			free(fileContents);
+		} else {
+			printf("(simulated) Migrate: %s\n", migrationsToBeRan[i]);
 		}
-
-		char *fileContents = malloc(fsize + 1);
-		fread(fileContents, fsize, 1, f);
-		fclose(f);
-
-		fileContents[fsize] = 0;
-
-		PGresult *res = PQexec(connection,fileContents);
-		if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
-			printf("\nFILE: %s\n", migrationsToBeRan[i]);
-			cleanup(connection, res);
-		}
-		PQclear(res);
-
-		/*
-		 *  TODO: consider concatenating this to the end of the users input
-		 *  to provide transactional support of inserting the migration record
-		 */
-		char *insertQuery[PATH_MAX + 100];
-		sprintf(insertQuery, "INSERT INTO pg_migrate (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i], latestBatch);
-		PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
-
-		if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
-			cleanup(connection, pgMigrateInsert);
-		}
-		PQclear(pgMigrateInsert);
-
-		printf("Migrated: %s\n", migrationsToBeRan[i]);
-		free(fileContents);
 		i++;
 	}
 
@@ -164,7 +169,7 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan) {
 
 }
 
-char *rollbackMigrations(PGconn *connection) {
+char *rollbackMigrations(PGconn *connection, int should_simulate) {
 
 	PGresult *downMigrationRecords = PQexec(connection,
 			"SELECT filename as up, replace(filename, '-up.sql', '-down.sql') as down"
@@ -201,33 +206,36 @@ char *rollbackMigrations(PGconn *connection) {
 			continue;
 		}
 
-		char *fileContents = malloc(fsize + 1);
-		fread(fileContents, fsize, 1, f);
-		fclose(f);
+		if (should_simulate == 0) {
+			char *fileContents = malloc(fsize + 1);
+			fread(fileContents, fsize, 1, f);
+			fclose(f);
 
-		fileContents[fsize] = 0;
+			fileContents[fsize] = 0;
 
-		PGresult *res = PQexec(connection,fileContents);
-		if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
-			printf("\nFILE: %s\n", downFilepath);
-			cleanup(connection, res);
+			PGresult *res = PQexec(connection, fileContents);
+			if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
+				printf("\nFILE: %s\n", downFilepath);
+				cleanup(connection, res);
+			}
+			PQclear(res);
+
+			/*
+			 *  TODO: concat to end of user input file
+			 */
+			char *insertQuery[PATH_MAX + 100];
+			sprintf(insertQuery, "DELETE FROM pg_migrate WHERE filename = '%s';", upFilepath);
+			PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
+
+			if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
+				cleanup(connection, pgMigrateInsert);
+			}
+			PQclear(pgMigrateInsert);
+			printf("Rolled back: %s\n", downFilepath);
+			free(fileContents);
+		} else {
+			printf("(simulated) Roll back: %s\n", downFilepath);
 		}
-		PQclear(res);
-
-		/*
-		 *  TODO: concat to end of user input file
-		 */
-		char *insertQuery[PATH_MAX + 100];
-		sprintf(insertQuery, "DELETE FROM pg_migrate WHERE filename = '%s';", upFilepath);
-		PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
-
-		if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
-			cleanup(connection, pgMigrateInsert);
-		}
-		PQclear(pgMigrateInsert);
-
-		printf("Rolled back: %s\n", downFilepath);
-		free(fileContents);
 		i++;
 	}
 	PQclear(downMigrationRecords);

@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (d) {
-		rollbackMigrations(connection);
+		rollbackMigrations(connection, p);
 		return 1;
 	}
 
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 			printf("Nothing to migrate\n");
 			return 1;
 		}
-		runMigrations(connection, migrationToBeRan);
+		runMigrations(connection, migrationToBeRan, p);
 	}
 
 	return 1;

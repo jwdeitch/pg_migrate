@@ -6,8 +6,8 @@ void cleanup(PGconn *connection, PGresult *res);
 PGconn *getConnection(PGconn *connection, char* connStr);
 char *getLatest(PGconn *connection, int num);
 char *getMigrationsFromDb(PGconn *connection);
-char *runMigrations(PGconn *connection, char** migrationsToBeRan);
-char *rollbackMigrations(PGconn *connection);
+char *runMigrations(PGconn *connection, char** migrationsToBeRan, int should_simulate);
+char *rollbackMigrations(PGconn *connection, int should_simulate);
 int checkIfSetup(PGconn *connection);
 void setup(PGconn *connection);
 
