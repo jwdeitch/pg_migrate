@@ -110,16 +110,13 @@ char **getMigrationsFromDb(PGconn *connection) {
 char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simulate) {
 
 	int i = 0;
-	PGresult *batchRes = PQexec(connection, "select max(batch) + 1 as batch from pg_migrate");
+	PGresult *batchRes = PQexec(connection, "select coalesce(max(batch) + 1,1) as batch from pg_migrate");
 	if (PQresultStatus(batchRes) != PGRES_TUPLES_OK) {
 		cleanup(connection, batchRes);
 	}
 
 	char* latestBatch = PQgetvalue(batchRes, 0, 0);
 	PQclear(batchRes);
-	if (strcmp(latestBatch,"0")) {
-		latestBatch = (char*)"1\n";
-	}
 
 	/*
 	 * \0 denotes the terminating element of this array
@@ -199,7 +196,7 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 		char* upFilepath = PQgetvalue(downMigrationRecords, i, 0);
 
 		if( access( downFilepath, F_OK ) == -1 ) {
-			printf("Skipping (file does not exists): %s", downFilepath);
+			printf("Skipping (file does not exists): %s\n", downFilepath);
 			continue;
 		}
 

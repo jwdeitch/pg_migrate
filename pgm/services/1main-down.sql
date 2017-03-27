@@ -1,1 +1,1 @@
-error
+select 'efewf' as test

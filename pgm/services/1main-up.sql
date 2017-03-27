@@ -1,1 +1,1 @@
-select 'from 1main-up' as test;
+select '1main-up' as test;
