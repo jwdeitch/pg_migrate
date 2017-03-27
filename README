@@ -1,3 +1,4 @@
 pg_migrate
 
-Files are transactional unless there are explicit transactions within. The migration will abort if any statements within fail.
+- Files are transactional unless there are explicit transactions within. The migration will abort if any statements within the file fail.
+- Corresponding up and down migrations must be in the same directory

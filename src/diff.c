@@ -1,7 +1,7 @@
 #include "diff.h"
 #include "fs.h"
 
-char **missing_from_fs(char **dbList, struct fs_discovered_migrations *fsList) {
+char **missing_from_db(char **dbList, struct fs_discovered_migrations *fsList) {
 	int fsi = 0;
 	char **list = malloc(1000 * sizeof(char *));
 	int filesLocated = 0;

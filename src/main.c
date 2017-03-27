@@ -13,17 +13,18 @@ int main(int argc, char *argv[]) {
 	PGconn *connection;
 	connection = getConnection(connection);
 
-	getLatest(connection, 10);
-	exit(0);
+//	getLatest(connection, 10);
+//	exit(0);
 
-	char** migrationToBeRan = missing_from_fs(getMigrationsFromDb(connection),getMigrationsFromFs("."));
+//	char** migrationToBeRan = missing_from_db(getMigrationsFromDb(connection),getMigrationsFromFs("."));
+//
+//	if (strcmp(migrationToBeRan[0], "\0") == 0) {
+//		printf("Nothing to migrate\n");
+//		exit(0);
+//	}
 
-	if (strcmp(migrationToBeRan[0], "\0") == 0) {
-		printf("Nothing to migrate\n");
-		exit(0);
-	}
-
-	runMigrations(connection, migrationToBeRan);
+//	runMigrations(connection, migrationToBeRan);
+	rollbackMigrations(connection);
 	return 1;
 }
 
