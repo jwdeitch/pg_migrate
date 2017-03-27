@@ -8,5 +8,7 @@ char *getLatest(PGconn *connection, int num);
 char *getMigrationsFromDb(PGconn *connection);
 char *runMigrations(PGconn *connection, char** migrationsToBeRan);
 char *rollbackMigrations(PGconn *connection);
+int checkIfSetup(PGconn *connection);
+void setup(PGconn *connection);
 
 #endif //PG_MIGRATE_PG_H

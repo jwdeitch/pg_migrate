@@ -24,7 +24,10 @@ int main(int argc, char *argv[]) {
 //	}
 
 //	runMigrations(connection, migrationToBeRan);
-	rollbackMigrations(connection);
+//	rollbackMigrations(connection);
+	if (checkIfSetup(connection) == 0) {
+		printf("ERROR: pg_migrate table not found in public schema\nRun `pg_migrate setup`");
+	}
 	return 1;
 }
 

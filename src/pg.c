@@ -229,3 +229,35 @@ char *rollbackMigrations(PGconn *connection) {
 	printf("\nFinished\n");
 
 }
+
+int checkIfSetup(PGconn *connection) {
+
+	PGresult *isSetupRes = PQexec(connection,"SELECT CASE WHEN EXISTS ("
+			" SELECT 1"
+			" FROM information_schema.tables"
+			" WHERE table_name = 'pg_migrate'"
+	") THEN 1 ELSE 0 END AS PROVISIONED;");
+
+	if (PQresultStatus(isSetupRes) != PGRES_TUPLES_OK) {
+		cleanup(connection, isSetupRes);
+	}
+
+	int provisioned = atoi(PQgetvalue(isSetupRes, 0, 0))==1;
+
+	PQclear(isSetupRes);
+
+	return provisioned;
+
+}
+
+void setup(PGconn *connection) {
+	PGresult *checkIfProvisioned = PQexec(connection,
+			"CREATE TABLE pg_migrate ("
+					"filename       VARCHAR,"
+					"batch          INT,"
+	                "time_performed TIMESTAMP DEFAULT now()"
+	         ");");
+	if (PQresultStatus(checkIfProvisioned) != PGRES_COMMAND_OK) {
+		cleanup(connection, checkIfProvisioned);
+	}
+}
