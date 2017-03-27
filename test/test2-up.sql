@@ -1,1 +1,0 @@
-select 'ok' as hello;

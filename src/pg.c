@@ -52,6 +52,12 @@ char *getLatest(PGconn *connection, int num) {
 
 	int rows = PQntuples(res);
 
+	if (rows == 0) {
+		printf("No migrations present in database\n");
+		PQclear(res);
+		exit(1);
+	}
+
 	int t_length = 0;
 	for (int j = rows - 1; j > -1; j--) {
 		int length = strlen(PQgetvalue(res, j, 0));

@@ -21,8 +21,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-
-	while ((c = getopt(argc, argv, "sH:udvhp")) != -1) {
+	while ((c = getopt(argc, argv, "sH:udvhgp")) != -1) {
 		switch (c) {
 			case 'd':
 				if (d == 1 || u == 1) {
@@ -82,17 +81,25 @@ int main(int argc, char *argv[]) {
 	PGconn *connection;
 	connection = getConnection(connection, connStr);
 
-	if (g == 1) {
+	int is_setup = checkIfSetup(connection);
+
+	if (g) {
+		if (is_setup == 1) {
+			printf("Already previously provisioned\n");
+			return 1;
+		}
 		setup(connection);
+		printf("Setup successful\n");
 		return 1;
 	}
 
+	if (is_setup == 0) {
+		printf("ERROR: pg_migrate table not found in public schema\nRun `pg_migrate -H [host url] -g`\n");
+		return 2;
+	}
+
 	if (s) {
-		if (checkIfSetup(connection) == 0) {
-			printf("ERROR: pg_migrate table not found in public schema\nRun `pg_migrate setup`\n");
-			return 2;
-		}
-		getLatest(connection, 10);
+		getLatest(connection, 20);
 		return 1;
 	}
 

@@ -1,1 +1,0 @@
-select 'mustard' as good;
