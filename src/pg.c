@@ -65,6 +65,10 @@ char *getLatest(PGconn *connection, int num) {
 			t_length = length;
 		}
 	}
+
+	/*
+	 * We are formatting this little ascii table by the length of the longest filesnames
+	 */
 	printf("%*s Filename %*s  |  Batch  |      Time Performed\n", (t_length/2)-4, "", (t_length/2)-7, "");
 	for (int i = rows - 1; i > -1; i--) {
 		printf("%s |    %s    | %s\n", PQgetvalue(res, i, 0), PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
@@ -117,12 +121,16 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_sim
 		latestBatch = (char*)"1\n";
 	}
 
+	/*
+	 * \0 denotes the terminating element of this array
+	 */
 	while (strcmp(migrationsToBeRan[i], "\0") != 0) {
 		FILE *f = fopen(migrationsToBeRan[i], "rb");
 		fseek(f, 0, SEEK_END);
 		long fsize = ftell(f);
 		fseek(f, 0, SEEK_SET);
 
+		// should we actually run these migrations?
 		if (should_simulate == 0) {
 			if (fsize == 0) {
 				printf("Skipping (file is empty): %s\n", migrationsToBeRan[i]);

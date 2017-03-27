@@ -142,7 +142,7 @@ void printHelp() {
 
 			"usage: pg_migrate -H [options]... dir\n\n"
 
-		"   -H        Host\n"
+		"   -H        Host (in postgres URI format)\n"
 		"   -s        Show last 10 forward migrations ran\n"
 		"   -u        Migrate forward. Recursively traverses provided directory for -up.sql files\n"
 		"   -d        Migrate rollback. Will attempt to locate matching -down.sql files to migrate backwards\n"
