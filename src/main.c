@@ -15,12 +15,14 @@ int main(int argc, char *argv[]) {
 	 * s-status, H-Host, u-up, d-down, v-version, p-soft, g-provision, h-help
 	 */
 	int c = 0, u = 0, d = 0, s = 0, g = 0, p = 0, H = 0, err = 0;
-	char *connStr = malloc(PATH_MAX);
+	char *connStr =  (char*)malloc(PATH_MAX*sizeof(char*));
+	if( connStr == NULL ) {
+		printf("malloc failed to dimension connStr");
+		exit(1);
+	}
 
-	printf("%i -- \n",  getopt(argc, argv, "sH:udvhp"));
 
 	while ((c = getopt(argc, argv, "sH:udvhp")) != -1) {
-//		printf("%s -- \n", c);
 		switch (c) {
 			case 'd':
 				if (d == 1 || u == 1) {
@@ -78,15 +80,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	PGconn *connection;
-	connection = getConnection(connection);
+	connection = getConnection(connection, connStr);
 
 	if (g == 1) {
 		setup(connection);
-		return 1;
-	}
-
-	if (u + d == 0) {
-		printf("Unspecified migration direction: up or down\n");
 		return 1;
 	}
 
@@ -96,6 +93,11 @@ int main(int argc, char *argv[]) {
 			return 2;
 		}
 		getLatest(connection, 10);
+		return 1;
+	}
+
+	if (u + d == 0) {
+		printf("Unspecified migration direction: up or down\n");
 		return 1;
 	}
 

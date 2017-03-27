@@ -16,9 +16,9 @@ void cleanup(PGconn *connection, PGresult *res) {
 }
 
 
-PGconn *getConnection(PGconn *connection) {
+PGconn *getConnection(PGconn *connection, char* connStr) {
 
-	connection = PQconnectdb("postgres://postgres:1234@localhost:5432/postgres");
+	connection = PQconnectdb(connStr);
 
 	if (PQstatus(connection) != CONNECTION_OK) {
 
