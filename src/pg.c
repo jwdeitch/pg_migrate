@@ -115,7 +115,8 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_sim
 		cleanup(connection, batchRes);
 	}
 
-	char* latestBatch = PQgetvalue(batchRes, 0, 0);
+	char* latestBatch[15];
+	strcpy(latestBatch, PQgetvalue(batchRes, 0, 0));
 	PQclear(batchRes);
 
 	/*
