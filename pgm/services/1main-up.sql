@@ -1,1 +1,1 @@
-select 'wefwef' as wefwef;
+select 'from 1main-up' as test;

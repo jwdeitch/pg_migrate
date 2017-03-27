@@ -1,1 +1,1 @@
-select wefwefwef as wefwefwef
+select 'test1' as base

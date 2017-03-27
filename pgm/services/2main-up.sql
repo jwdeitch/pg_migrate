@@ -1,1 +1,1 @@
-select 'wewefwef' as test2
+select 'from 2main-up' as test2

@@ -115,16 +115,14 @@ int main(int argc, char *argv[]) {
 
 	if (u) {
 		char *file = argv[optind];
-		char path[PATH_MAX];
-		realpath(path, file);
+		char *path[PATH_MAX];
+		realpath(file, path);
 		DIR* dir = opendir(path);
 		if (!dir) {
-			fprintf(stderr, "No valid directory provided\n");
+			fprintf(stderr, "No valid directory provided %s\n", path);
+			exit(1);
 		}
 		closedir(dir);
-//		if (getcwd(cwd, sizeof(cwd)) == NULL) {
-//			perror("getcwd() error\n");
-//		}
 		char **migrationToBeRan = missing_from_db(getMigrationsFromDb(connection), getMigrationsFromFs(path));
 		if (strcmp(migrationToBeRan[0], "\0") == 0) {
 			printf("Nothing to migrate\n");
