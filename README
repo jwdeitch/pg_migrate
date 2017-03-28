@@ -4,16 +4,16 @@ A lightweight utility to manage postgres schema, views, tables, triggers, and fu
 pg_migrate will recursively traverse a directory tree and run sql files postfixed with -up.sql or -down.sql. up migrations move the database schema forward, and down migrations rollback those operations.
 
 
-Project/
-	|---------views/
-				|-------- restaurants-up.sql
-				|-------- restaurants-down.sql
-				|-------- food/
-	|---------triggers/
-				|-------- waitStaff-up.sql
-				|-------- waitStaff-down.sql
-				|-------- kitchenStaff-up.sql
-				|-------- kitchenStaff-down.sql
+    Project/
+	|--- views/
+		|--- restaurants-up.sql
+		|--- restaurants-down.sql
+		|--- food/
+	|--- triggers/
+		|--- waitStaff-up.sql
+		|--- waitStaff-down.sql
+		|--- kitchenStaff-up.sql
+		|--- kitchenStaff-down.sql
 
 usage: pg_migrate -H [options]... dir
 
