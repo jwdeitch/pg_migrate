@@ -3,7 +3,6 @@ A lightweight utility to manage postgres schema, views, tables, triggers, and fu
 
 pg_migrate will recursively traverse a directory tree and run sql files postfixed with -up.sql or -down.sql. up migrations move the database schema forward, and down migrations rollback those operations.
 
-```
 
 Project/
 	|---------views/
@@ -16,10 +15,6 @@ Project/
 				|-------- kitchenStaff-up.sql
 				|-------- kitchenStaff-down.sql
 
-```
----
-
-```
 usage: pg_migrate -H [options]... dir
 
 		-H        Host (in postgres URI format)
@@ -28,9 +23,8 @@ usage: pg_migrate -H [options]... dir
 		-d        Migrate rollback. Will attempt to locate matching -down.sql files to migrate backwards
 		-p        Soft run. Will display migrations to be ran / rolled back
 		-g        Provisions the public schema with the pg_migrate table, used to track migrations
-```
 
-### Installation
+Installation
 
 The release binary is compiled against amd64 linux (ubuntu) and therefore will only work on that system architecture. You may download source and `make build` to compile locally.
 
@@ -42,7 +36,7 @@ example:
 `pg_migrate -H postgres://postgres:pass@localhost:5432/postgres -p -d .`
 simulate an up migration for everything in this directory tree
 
-### Notes
+Notes
 
 - Files are transactional unless there are explicit transactions within. The migration will abort if any statements within the file fail.
 - Corresponding up and down migrations must be in the same directory
