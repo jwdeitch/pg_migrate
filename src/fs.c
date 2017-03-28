@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <string.h>
+#include <stdio.h>
 
 struct fs_discovered_migrations *file_names_arr;
 int *itr;

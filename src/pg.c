@@ -208,7 +208,6 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 
 		if (fsize == 0) {
 			printf("Skipping (file is empty): %s\n", downFilepath);
-			i++;
 			continue;
 		}
 
@@ -242,7 +241,6 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 		} else {
 			printf("(simulated) Roll back: %s\n", downFilepath);
 		}
-		i++;
 	}
 	PQclear(downMigrationRecords);
 

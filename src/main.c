@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include "pg.h"
 #include "fs.h"
 #include "diff.h"

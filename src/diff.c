@@ -1,5 +1,7 @@
 #include "diff.h"
 #include "fs.h"
+#include <stdlib.h>
+#include <string.h>
 
 char **missing_from_db(char **dbList, struct fs_discovered_migrations *fsList) {
 	int fsi = 0;
