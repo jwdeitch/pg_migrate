@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 	 * s-status, H-Host, u-up, d-down, v-version, p-soft, g-provision, h-help
 	 */
 	int c = 0, u = 0, d = 0, s = 0, g = 0, p = 0, H = 0, err = 0;
-	char *connStr =  (char*)malloc(PATH_MAX*sizeof(char*));
+	char *connStr =  (char*)malloc(PATH_MAX*sizeof(connStr));
 	if( connStr == NULL ) {
 		printf("malloc failed to dimension connStr");
 		exit(1);

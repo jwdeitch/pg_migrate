@@ -69,9 +69,10 @@ char *getLatest(PGconn *connection, int num) {
 	/*
 	 * We are formatting this little ascii table by the length of the longest filesnames
 	 */
-	printf("%*s Filename %*s  |  Batch  |      Time Performed\n", (t_length/2)-4, "", (t_length/2)-7, "");
+	printf("%*s Filename %*s  |  Batch  |      Time Performed\n", (t_length-strlen("filename"))/2, "", (t_length-strlen("filename"))/2, "");
 	for (int i = rows - 1; i > -1; i--) {
-		printf("%s |    %s    | %s\n", PQgetvalue(res, i, 0), PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
+		char* filename = PQgetvalue(res, i, 0);
+		printf("%s %*s  |    %s    | %s\n", filename, (t_length - strlen(filename)), "", PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
 	}
 
 	PQclear(res);
