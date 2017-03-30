@@ -18,14 +18,14 @@ pg_migrate will recursively traverse a directory tree and run sql files postfixe
 
 usage: pg_migrate -H [options]... dir
 
-	-H   Host (in postgres URI format)
-	-h   Show help text
-	-v   Show version information
-	-s   Show last 10 forward migrations ran
-	-u   Migrate forward. Recursively traverses provided directory for -up.sql files
-	-d   Migrate rollback. Will attempt to locate matching -down.sql files to migrate backwards
-	-p   Soft run. Will display migrations to be ran / rolled back
-	-g   Provisions the public schema with the pg_migrate table, used to track migrations
+  -H   Host (in postgres URI format)
+  -h   Show help text
+  -v   Show version information
+  -s   Show last 10 forward migrations ran
+  -u   Migrate forward. Recursively traverses provided directory for -up.sql files
+  -d   Migrate rollback. Will attempt to locate matching -down.sql files to migrate backwards
+  -p   Soft run. Will display migrations to be ran / rolled back
+  -g   Provisions the public schema with the pg_migrate table, used to track migrations
 
 
 Installation
@@ -33,11 +33,11 @@ Installation
 The release binary is compiled against amd64 linux (ubuntu) and therefore will only work on that system architecture. You may download source and `make build` to compile locally.
 
 Before first run, you must provision the database by running pg_migrate with the -g and -H flags. This is to create the `public.pg_migrate` table, which stores information about which migrations have been ran:
-`pg_migrate -H postgres://postgres:pass@localhost:5432/postgres -g`
+`pg_migrate -H postgres://postgres:pass@localhost:5432 -g`
 
 
 example:
-`pg_migrate -H postgres://postgres:pass@localhost:5432/postgres -p -d .`
+`pg_migrate -H postgres://postgres:pass@localhost:5432 -p -d .`
 simulate an up migration for everything in this directory tree
 
 

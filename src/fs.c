@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 struct fs_discovered_migrations *file_names_arr;
 int *itr;
@@ -39,7 +40,7 @@ void listdir(const char *name, int level) {
 			}
 			listdir(path, level + 1);
 		} else {
-			char *path[PATH_MAX];
+			char path[PATH_MAX];
 			strcpy(path, name);
 			strcat(path, "/");
 			strcat(path, entry->d_name);

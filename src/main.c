@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 
 	if (u) {
 		char *file = argv[optind];
-		char *path[PATH_MAX];
+		char path[PATH_MAX];
 		realpath(file, path);
 		DIR* dir = opendir(path);
 		if (!dir) {
