@@ -16,7 +16,7 @@ pg_migrate will recursively traverse a directory tree and run sql files postfixe
 		|--- kitchenStaff-down.sql
 
 
-usage: pg_migrate -H [options]... dir
+usage: pg_migrate -H postgres://URI [options]... dir
 
   -H   Host (in postgres URI format)
   -h   Show help text

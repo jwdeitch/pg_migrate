@@ -129,6 +129,7 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_sim
 	 */
 	while (strcmp(migrationsToBeRan[i], "\0") != 0) {
 		FILE *f = fopen(migrationsToBeRan[i], "rb");
+		// TODO: check if failed
 		fseek(f, 0, SEEK_END);
 		long fsize = ftell(f);
 		fseek(f, 0, SEEK_SET);
