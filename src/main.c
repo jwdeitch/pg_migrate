@@ -8,6 +8,7 @@
 #include "diff.h"
 
 void printHelp();
+const char* version = "1.0.0";
 
 int main(int argc, char *argv[]) {
 	extern char *optarg;
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
 				strcpy(connStr, optarg);
 				break;
 			case 'v':
-				printf("pg_migrate version 0.0.1\n");
+				printf("pg_migrate version %s\n", version);
 				exit(0);
 			case 'u':
 				if (d == 1 || u == 1) {
@@ -144,7 +145,7 @@ int main(int argc, char *argv[]) {
 
 void printHelp() {
 
-	printf("\n  pg_migrate 0.0.1\n"
+	printf("\n  pg_migrate %s\n"
 			"  https://github.com/jwdeitch/pg_migrate\n"
 			"  MIT 2017\n\n"
 
@@ -158,7 +159,7 @@ void printHelp() {
 	" -p   Soft run. Will display migrations to be ran / rolled back\n"
 	" -g   Provisions the public schema with the pg_migrate table, used to track migrations\n\n"
 
-	);
+	, version);
 
 }
 
