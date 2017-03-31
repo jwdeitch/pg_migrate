@@ -180,6 +180,18 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_sim
 
 }
 
+void runRollbackFile(PGconn *connection, char* upFilepath, char* downFilepath) {
+	char insertQuery[PATH_MAX + 100];
+	sprintf(insertQuery, "DELETE FROM pg_migrate WHERE filename = '%s';", upFilepath);
+	PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
+
+	if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
+		cleanup(connection, pgMigrateInsert);
+	}
+	PQclear(pgMigrateInsert);
+	printf("Rolled back: %s\n", downFilepath);
+}
+
 char *rollbackMigrations(PGconn *connection, int should_simulate) {
 
 	PGresult *downMigrationRecords = PQexec(connection,
@@ -203,6 +215,7 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 
 		if( access( downFilepath, F_OK ) == -1 ) {
 			printf("Skipping (file does not exists): %s\n", downFilepath);
+			runRollbackFile(connection, upFilepath, downFilepath);
 			continue;
 		}
 
@@ -213,6 +226,7 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 
 		if (fsize == 0) {
 			printf("Skipping (file is empty): %s\n", downFilepath);
+			runRollbackFile(connection, upFilepath, downFilepath);
 			continue;
 		}
 
@@ -229,20 +243,8 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 				cleanup(connection, res);
 			}
 			PQclear(res);
-
-			/*
-			 *  TODO: concat to end of user input file
-			 */
-			char insertQuery[PATH_MAX + 100];
-			sprintf(insertQuery, "DELETE FROM pg_migrate WHERE filename = '%s';", upFilepath);
-			PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
-
-			if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
-				cleanup(connection, pgMigrateInsert);
-			}
-			PQclear(pgMigrateInsert);
-			printf("Rolled back: %s\n", downFilepath);
 			free(fileContents);
+			runRollbackFile(connection, upFilepath, downFilepath);
 		} else {
 			printf("(simulated) Roll back: %s\n", downFilepath);
 		}
