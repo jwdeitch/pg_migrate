@@ -51,7 +51,7 @@ void listdir(const char *name, int level) {
 			}
 		}
 
-	} while (entry = readdir(dir));
+	} while ((entry = readdir(dir)));
 	closedir(dir);
 }
 

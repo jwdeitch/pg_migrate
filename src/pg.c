@@ -33,7 +33,7 @@ PGconn *getConnection(PGconn *connection, char* connStr) {
 	return connection;
 }
 
-char *getLatest(PGconn *connection, int num) {
+void getLatest(PGconn *connection, int num) {
 	char str[5];
 	sprintf(str, "%d", num);
 
@@ -76,7 +76,7 @@ char *getLatest(PGconn *connection, int num) {
 
 	for (int i = rows - 1; i > -1; i--) {
 		char* filename = PQgetvalue(res, i, 0);
-		printf("%s %*s  |    %s    | %s\n", filename, (t_length - strlen(filename)), "", PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
+		printf("%s %*s  |    %s    | %s\n", filename, (int)(t_length - strlen(filename)), "", PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
 	}
 
 	PQclear(res);
@@ -99,7 +99,7 @@ char **getMigrationsFromDb(PGconn *connection) {
 	}
 
 	int i = 0;
-	for (i; i < rows; i++) {
+	for (; i < rows; i++) {
 		list[i] = (char *) malloc(PATH_MAX + 1);
 		strcpy(list[i], strdup(PQgetvalue(res, i, 0)));
 	}
@@ -112,7 +112,7 @@ char **getMigrationsFromDb(PGconn *connection) {
 }
 
 // http://stackoverflow.com/a/14002993/4603498
-char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simulate) {
+void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simulate) {
 
 	int i = 0;
 	PGresult *batchRes = PQexec(connection, "select coalesce(max(batch) + 1,1) as batch from pg_migrate");
@@ -192,7 +192,7 @@ void runRollbackFile(PGconn *connection, char* upFilepath, char* downFilepath) {
 	PQclear(pgMigrateInsert);
 }
 
-char *rollbackMigrations(PGconn *connection, int should_simulate) {
+void rollbackMigrations(PGconn *connection, int should_simulate) {
 
 	PGresult *downMigrationRecords = PQexec(connection,
 			"SELECT filename as up, replace(filename, '-up.sql', '-down.sql') as down"
