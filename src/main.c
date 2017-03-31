@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 					exit(1);
 				}
 				H = 1;
-				connStr = optarg;
+				strcpy(connStr, optarg);
 				break;
 			case 'v':
 				printf("pg_migrate version 0.0.1\n");
@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	connection = getConnection(connection, connStr);
+	free(connStr);
 
 	int is_setup = checkIfSetup(connection);
 
