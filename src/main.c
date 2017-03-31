@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 				d = 1;
 				break;
 			case 'p':
-				if (d == 1) {
+				if (p == 1) {
 					printf("duplicate -p flag\n");
 					exit(1);
 				}

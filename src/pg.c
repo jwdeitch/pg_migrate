@@ -189,7 +189,6 @@ void runRollbackFile(PGconn *connection, char* upFilepath, char* downFilepath) {
 		cleanup(connection, pgMigrateInsert);
 	}
 	PQclear(pgMigrateInsert);
-	printf("Rolled back: %s\n", downFilepath);
 }
 
 char *rollbackMigrations(PGconn *connection, int should_simulate) {
@@ -215,7 +214,9 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 
 		if( access( downFilepath, F_OK ) == -1 ) {
 			printf("Skipping (file does not exists): %s\n", downFilepath);
-			runRollbackFile(connection, upFilepath, downFilepath);
+			if (should_simulate == 0) {
+				runRollbackFile(connection, upFilepath, downFilepath);
+			}
 			continue;
 		}
 
@@ -226,7 +227,9 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 
 		if (fsize == 0) {
 			printf("Skipping (file is empty): %s\n", downFilepath);
-			runRollbackFile(connection, upFilepath, downFilepath);
+			if (should_simulate == 0) {
+				runRollbackFile(connection, upFilepath, downFilepath);
+			}
 			continue;
 		}
 
@@ -245,6 +248,7 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 			PQclear(res);
 			free(fileContents);
 			runRollbackFile(connection, upFilepath, downFilepath);
+			printf("Rolled back: %s\n", downFilepath);
 		} else {
 			printf("(simulated) Roll back: %s\n", downFilepath);
 		}
