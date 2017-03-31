@@ -5,6 +5,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <math.h>
 
 void cleanup(PGconn *connection, PGresult *res) {
 	fprintf(stderr, "%s\n", PQerrorMessage(connection));
@@ -69,7 +70,10 @@ char *getLatest(PGconn *connection, int num) {
 	/*
 	 * We are formatting this little ascii table by the length of the longest filesnames
 	 */
-	printf("%*s Filename %*s  |  Batch  |      Time Performed\n", (t_length-strlen("filename"))/2, "", (t_length-strlen("filename"))/2, "");
+	printf("%*s Filename %*s  |  Batch  |      Time Performed\n",
+		   (int)ceil((t_length-strlen("filename")-1)/2), "",
+		   (int)ceil((t_length-strlen("filename"))/2), "");
+
 	for (int i = rows - 1; i > -1; i--) {
 		char* filename = PQgetvalue(res, i, 0);
 		printf("%s %*s  |    %s    | %s\n", filename, (t_length - strlen(filename)), "", PQgetvalue(res, i, 1), PQgetvalue(res, i, 2));
