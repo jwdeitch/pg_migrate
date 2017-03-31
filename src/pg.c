@@ -36,7 +36,7 @@ char *getLatest(PGconn *connection, int num) {
 	char str[5];
 	sprintf(str, "%d", num);
 
-	char *query[1000];
+	char query[1000];
 	strcpy(query, "SELECT filename, batch, to_char(time_performed, 'MM/DD/YY @ HH:MI:SS AM')"
 			" FROM pg_migrate"
 			" ORDER BY batch DESC, time_performed DESC"
@@ -116,7 +116,7 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_sim
 		cleanup(connection, batchRes);
 	}
 
-	char* latestBatch[15];
+	char latestBatch[15];
 	strcpy(latestBatch, PQgetvalue(batchRes, 0, 0));
 	PQclear(batchRes);
 
@@ -154,7 +154,7 @@ char *runMigrations(PGconn *connection, char **migrationsToBeRan, int should_sim
 			 *  TODO: consider concatenating this to the end of the users input
 			 *  to provide transactional support of inserting the migration record
 			 */
-			char *insertQuery[PATH_MAX + 100];
+			char insertQuery[PATH_MAX + 100];
 			sprintf(insertQuery, "INSERT INTO pg_migrate (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i],
 					latestBatch);
 			PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
@@ -229,7 +229,7 @@ char *rollbackMigrations(PGconn *connection, int should_simulate) {
 			/*
 			 *  TODO: concat to end of user input file
 			 */
-			char *insertQuery[PATH_MAX + 100];
+			char insertQuery[PATH_MAX + 100];
 			sprintf(insertQuery, "DELETE FROM pg_migrate WHERE filename = '%s';", upFilepath);
 			PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
 
