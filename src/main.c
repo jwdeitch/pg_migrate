@@ -76,8 +76,13 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	if (optind == 1) {
+		printHelp();
+		exit(1);
+	}
+
 	if (H == 0) {
-		printf("No Host url argument provided\n");
+		printf("No Host URI provided\n");
 		return 1;
 	}
 
@@ -139,19 +144,19 @@ int main(int argc, char *argv[]) {
 
 void printHelp() {
 
-	printf("pg_migrate 0.0.1\n"
-			"https://github.com/jwdeitch/pg_migrate\n"
-			"MIT 2017\n\n"
+	printf("\n  pg_migrate 0.0.1\n"
+			"  https://github.com/jwdeitch/pg_migrate\n"
+			"  MIT 2017\n\n"
 
-	"usage: pg_migrate -H postgres://URI [options]... dir\n"
+	"    usage: pg_migrate -H postgres://URI [options]... dir\n\n"
 
-	"-H   Host (in postgres URI format)\n"
-	"-v   Show version information\n"
-	"-s   Show last 10 forward migrations ran\n"
-	"-u   Migrate forward. Recursively traverses provided directory for -up.sql files\n"
-	"-d   Migrate rollback. Will attempt to locate matching -down.sql files to migrate backwards\n"
-	"-p   Soft run. Will display migrations to be ran / rolled back\n"
-	"-g   Provisions the public schema with the pg_migrate table, used to track migrations\n"
+	" -H   Host (in postgres URI format)\n"
+	" -v   Show version information\n"
+	" -s   Show last 10 forward migrations ran\n"
+	" -u   Migrate forward. Recursively traverses provided directory for -up.sql files\n"
+	" -d   Migrate rollback. Will attempt to locate matching -down.sql files to migrate backwards\n"
+	" -p   Soft run. Will display migrations to be ran / rolled back\n"
+	" -g   Provisions the public schema with the pg_migrate table, used to track migrations\n\n"
 
 	);
 
