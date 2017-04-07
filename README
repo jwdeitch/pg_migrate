@@ -34,9 +34,9 @@ simulate an up migration for everything in this directory tree
 
 Installation
 
-Download: https://github.com/jwdeitch/pg_migrate/releases/tag/1.0.0
+Download: https://github.com/jwdeitch/pg_migrate/releases/tag/1.0.1
 and move to /usr/local/bin/:
-`curl -L https://github.com/jwdeitch/pg_migrate/releases/download/1.0.0/pg_migrate -o pg_migrate && mv pg_migrate /usr/local/bin/`
+`curl -L https://github.com/jwdeitch/pg_migrate/releases/download/1.0.1/pg_migrate -o pg_migrate && mv pg_migrate /usr/local/bin/`
 
 ** The release binary is compiled against amd64 linux (ubuntu) and therefore will only work on that system architecture. You may download source and `make build` to compile locally.
 
