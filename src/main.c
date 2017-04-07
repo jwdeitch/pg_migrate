@@ -8,7 +8,7 @@
 #include "diff.h"
 
 void printHelp();
-const char *version = "1.0.0";
+const char *version = "1.0.1";
 
 int main(int argc, char *argv[]) {
 	extern char *optarg;
