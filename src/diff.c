@@ -2,10 +2,15 @@
 #include "fs.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 char **missing_from_db(char **dbList, struct fs_discovered_migrations *fsList) {
 	int fsi = 0;
 	char **list = malloc(1000 * sizeof(char *));
+	if (list == NULL) {
+		printf("malloc failed to allocate\n");
+		exit(1);
+	}
 	int filesLocated = 0;
 
 	while (strcmp(fsList[fsi].name, "\0")) {
@@ -20,12 +25,20 @@ char **missing_from_db(char **dbList, struct fs_discovered_migrations *fsList) {
 		}
 		if (!located) {
 			list[filesLocated] = (char *) malloc(PATH_MAX + 1);
+			if (list[filesLocated] == NULL) {
+				printf("malloc failed to allocate\n");
+				exit(1);
+			}
 			strcpy(list[filesLocated], fsList[fsi].name);
 			filesLocated++;
 		}
 		fsi++;
 	}
 	list[filesLocated] = (char *)malloc(PATH_MAX + 1);
+	if (list[filesLocated] == NULL) {
+		printf("malloc failed to allocate\n");
+		exit(1);
+	}
 	strcpy(list[filesLocated],"\0");
 	return list;
 

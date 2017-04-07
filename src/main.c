@@ -8,7 +8,7 @@
 #include "diff.h"
 
 void printHelp();
-const char* version = "1.0.0";
+const char *version = "1.0.0";
 
 int main(int argc, char *argv[]) {
 	extern char *optarg;
@@ -18,10 +18,14 @@ int main(int argc, char *argv[]) {
 	 * s-status, H-Host, u-up, d-down, v-version, p-soft, g-provision, h-help
 	 */
 	int c = 0, u = 0, d = 0, s = 0, g = 0, p = 0, H = 0;
-	char *connStr =  (char*)malloc(PATH_MAX*sizeof(connStr));
+	char *connStr = (char *) malloc(PATH_MAX * sizeof(connStr));
+	if (connStr == NULL) {
+		printf("malloc failed to allocate\n");
+		exit(1);
+	}
 
-	if( connStr == NULL ) {
-		printf("malloc failed to dimension connStr");
+	if (connStr == NULL) {
+		printf("malloc failed to dimension connStr\n");
 		exit(1);
 	}
 
@@ -123,10 +127,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (u) {
+		if (argv[optind] == NULL) {
+			fprintf(stderr, "No directory provided\n");
+			exit(1);
+		}
 		char *file = argv[optind];
 		char path[PATH_MAX];
 		realpath(file, path);
-		DIR* dir = opendir(path);
+		DIR *dir = opendir(path);
 		if (!dir) {
 			fprintf(stderr, "No valid directory provided %s\n", path);
 			exit(1);

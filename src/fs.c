@@ -58,7 +58,15 @@ void listdir(const char *name, int level) {
 
 struct fs_discovered_migrations *getMigrationsFromFs(const char *dir) {
 	file_names_arr = calloc(1000, sizeof(*file_names_arr));
+	if (file_names_arr == NULL) {
+		printf("failed to allocate memory\n");
+		exit(1);
+	}
 	itr = calloc(1000, sizeof(int));
+	if (itr == NULL) {
+		printf("failed to allocate memory\n");
+		exit(1);
+	}
 	*itr = 0;
 	listdir(".", 15);
 	strcpy(file_names_arr[*itr].name, "\0");

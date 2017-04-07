@@ -95,15 +95,26 @@ char **getMigrationsFromDb(PGconn *connection) {
 	char **list = malloc(1000 * sizeof(char *));
 	if (list == NULL) {
 		PQfinish(connection);
+		printf("malloc failed\n");
 		exit(1);
 	}
 
 	int i = 0;
 	for (; i < rows; i++) {
 		list[i] = (char *) malloc(PATH_MAX + 1);
+		if (list[i] == NULL) {
+			PQfinish(connection);
+			printf("malloc failed\n");
+			exit(1);
+		}
 		strcpy(list[i], strdup(PQgetvalue(res, i, 0)));
 	}
 	list[i + 1] = (char *) malloc(PATH_MAX + 1);
+	if (list[i + 1] == NULL) {
+		PQfinish(connection);
+		printf("malloc failed\n");
+		exit(1);
+	}
 	strcpy(list[i + 1], "\0");
 
 	PQclear(res);
@@ -143,6 +154,10 @@ void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simu
 			}
 
 			char *fileContents = malloc(fsize + 1);
+			if (fileContents == NULL) {
+				printf("malloc failed to allocate\n");
+				exit(1);
+			}
 			fread(fileContents, fsize, 1, f);
 			fclose(f);
 
@@ -236,6 +251,10 @@ void rollbackMigrations(PGconn *connection, int should_simulate) {
 
 		if (should_simulate == 0) {
 			char *fileContents = malloc(fsize + 1);
+			if (fileContents == NULL) {
+				printf("malloc failed to allocate\n");
+				exit(1);
+			}
 			fread(fileContents, fsize, 1, f);
 			fclose(f);
 
