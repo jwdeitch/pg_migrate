@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
 	 */
 	int c = 0, u = 0, d = 0, s = 0, g = 0, p = 0, H = 0;
 	char *connStr = (char *) malloc(PATH_MAX * sizeof(connStr));
+	memset(connStr, 0, PATH_MAX * sizeof(connStr));
 	if (connStr == NULL) {
 		printf("malloc failed to allocate\n");
 		exit(1);

@@ -93,6 +93,7 @@ char **getMigrationsFromDb(PGconn *connection) {
 	int rows = PQntuples(res);
 
 	char **list = malloc(1000 * sizeof(char *));
+	memset(list, 0, 1000 * sizeof(char *));
 	if (list == NULL) {
 		PQfinish(connection);
 		printf("malloc failed\n");
@@ -102,6 +103,7 @@ char **getMigrationsFromDb(PGconn *connection) {
 	int i = 0;
 	for (; i < rows; i++) {
 		list[i] = (char *) malloc(PATH_MAX + 1);
+		memset(list[i], 0, PATH_MAX + 1);
 		if (list[i] == NULL) {
 			PQfinish(connection);
 			printf("malloc failed\n");
@@ -110,6 +112,7 @@ char **getMigrationsFromDb(PGconn *connection) {
 		strcpy(list[i], strdup(PQgetvalue(res, i, 0)));
 	}
 	list[i + 1] = (char *) malloc(PATH_MAX + 1);
+	memset(list[i + 1], 0, PATH_MAX + 1);
 	if (list[i + 1] == NULL) {
 		PQfinish(connection);
 		printf("malloc failed\n");
@@ -154,6 +157,7 @@ void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simu
 			}
 
 			char *fileContents = malloc(fsize + 1);
+			memset(fileContents, 0, fsize + 1);
 			if (fileContents == NULL) {
 				printf("malloc failed to allocate\n");
 				exit(1);
@@ -251,6 +255,7 @@ void rollbackMigrations(PGconn *connection, int should_simulate) {
 
 		if (should_simulate == 0) {
 			char *fileContents = malloc(fsize + 1);
+			memset(fileContents, 0, fsize + 1);
 			if (fileContents == NULL) {
 				printf("malloc failed to allocate\n");
 				exit(1);
