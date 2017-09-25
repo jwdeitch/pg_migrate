@@ -1,9 +1,16 @@
+/*
+ * Includes logic related to diffing lists
+ */
+
 #include "diff.h"
 #include "fs.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
+/*
+ * Compares lists from the database, filesystem and returns the difference
+ */
 char **missing_from_db(char **dbList, struct fs_discovered_migrations *fsList) {
 	int fsi = 0;
 	char **list = malloc(1000 * sizeof(char *));

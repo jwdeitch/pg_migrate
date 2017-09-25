@@ -1,3 +1,7 @@
+/*
+ * Includes filesystem routines
+ */
+
 #include "fs.h"
 #include <unistd.h>
 #include <sys/types.h>
@@ -9,7 +13,10 @@
 struct fs_discovered_migrations *file_names_arr;
 int *itr;
 
-//http://stackoverflow.com/a/37188697/4603498
+/*
+ * Returns bool if a subject string contains suffix
+ * http://stackoverflow.com/a/37188697/4603498
+ */
 int string_ends_with(const char *str, const char *suffix) {
 	int str_len = strlen(str);
 	int suffix_len = strlen(suffix);
@@ -20,7 +27,10 @@ int string_ends_with(const char *str, const char *suffix) {
 }
 
 
-// http://stackoverflow.com/a/8438663/4603498
+/*
+ * Lists a directories contents
+ * http://stackoverflow.com/a/8438663/4603498
+ */
 void listdir(const char *name, int level) {
 	DIR *dir;
 	struct dirent *entry;
@@ -56,6 +66,9 @@ void listdir(const char *name, int level) {
 }
 
 
+/*
+ * Detects all migration files present on filesystem
+ */
 struct fs_discovered_migrations *getMigrationsFromFs(const char *dir) {
 	file_names_arr = calloc(1000, sizeof(*file_names_arr));
 	if (file_names_arr == NULL) {

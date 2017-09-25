@@ -1,12 +1,27 @@
+/*
+ * Includes logic pertaining to database interaction
+ */
+
 #include <libpq-fe.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#ifdef __APPLE__
+#include <sys/syslimits.h>
+#else
+#include <linux/limits.h>
+#endif
+
 #include <execinfo.h>
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <math.h>
 
+/*
+ *  Write error messages, frees storages associated
+ *  with PQResult and closes PQConn
+ */
 void cleanup(PGconn *connection, PGresult *res) {
 	fprintf(stderr, "%s\n", PQerrorMessage(connection));
 
@@ -16,7 +31,9 @@ void cleanup(PGconn *connection, PGresult *res) {
 	exit(1);
 }
 
-
+/*
+ * Gracefully create new PQConnection
+ */
 PGconn *getConnection(PGconn *connection, char* connStr) {
 
 	connection = PQconnectdb(connStr);
@@ -33,13 +50,17 @@ PGconn *getConnection(PGconn *connection, char* connStr) {
 	return connection;
 }
 
+/*
+ * Retrieve latest migrations from postgres,
+ * prints directly to stdout
+ */
 void getLatest(PGconn *connection, int num) {
 	char str[5];
 	sprintf(str, "%d", num);
 
 	char query[1000];
 	strcpy(query, "SELECT filename, batch, to_char(time_performed, 'MM/DD/YY @ HH:MI:SS AM')"
-			" FROM pg_migrate"
+			" FROM pgmigrate.manifest"
 			" ORDER BY batch DESC, time_performed DESC"
 			" LIMIT ");
 	strcat(query, str);
@@ -83,8 +104,11 @@ void getLatest(PGconn *connection, int num) {
 }
 
 
+/*
+ * Retrieve all migrations from postgres
+ */
 char **getMigrationsFromDb(PGconn *connection) {
-	PGresult *res = PQexec(connection, "SELECT filename FROM pg_migrate");
+	PGresult *res = PQexec(connection, "SELECT filename FROM pgmigrate.manifest");
 
 	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 		cleanup(connection, res);
@@ -125,11 +149,15 @@ char **getMigrationsFromDb(PGconn *connection) {
 	return list;
 }
 
-// http://stackoverflow.com/a/14002993/4603498
+
+/*
+ * Run migrations on filesystem different from DB
+ * Add file to manifest of ran migrations
+ */
 void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simulate) {
 
 	int i = 0;
-	PGresult *batchRes = PQexec(connection, "select coalesce(max(batch) + 1,1) as batch from pg_migrate");
+	PGresult *batchRes = PQexec(connection, "SELECT coalesce(max(batch) + 1,1) AS batch FROM pgmigrate.manifest");
 	if (PQresultStatus(batchRes) != PGRES_TUPLES_OK) {
 		cleanup(connection, batchRes);
 	}
@@ -143,7 +171,10 @@ void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simu
 	 */
 	while (strcmp(migrationsToBeRan[i], "\0") != 0) {
 		FILE *f = fopen(migrationsToBeRan[i], "rb");
-		// TODO: check if failed
+		if(f == NULL) {
+            printf("Cannot open migration file: %s\n", migrationsToBeRan[i]);
+            exit(1);
+        }
 		fseek(f, 0, SEEK_END);
 		long fsize = ftell(f);
 		fseek(f, 0, SEEK_SET);
@@ -179,7 +210,7 @@ void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simu
 			 *  to provide transactional support of inserting the migration record
 			 */
 			char insertQuery[PATH_MAX + 100];
-			sprintf(insertQuery, "INSERT INTO pg_migrate (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i],
+			sprintf(insertQuery, "INSERT INTO pgmigrate.manifest (filename, batch) VALUES ('%s', %s);", migrationsToBeRan[i],
 					latestBatch);
 			PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
 
@@ -200,9 +231,12 @@ void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simu
 
 }
 
+/*
+ * Remove file to manifest of ran migrations
+ */
 void runRollbackFile(PGconn *connection, char* upFilepath, char* downFilepath) {
 	char insertQuery[PATH_MAX + 100];
-	sprintf(insertQuery, "DELETE FROM pg_migrate WHERE filename = '%s';", upFilepath);
+	sprintf(insertQuery, "DELETE FROM pgmigrate.manifest WHERE filename = '%s';", upFilepath);
 	PGresult *pgMigrateInsert = PQexec(connection, insertQuery);
 
 	if (PQresultStatus(pgMigrateInsert) != PGRES_COMMAND_OK) {
@@ -211,12 +245,15 @@ void runRollbackFile(PGconn *connection, char* upFilepath, char* downFilepath) {
 	PQclear(pgMigrateInsert);
 }
 
+/*
+ * Rollback migrations by order of batch
+ */
 void rollbackMigrations(PGconn *connection, int should_simulate) {
 
 	PGresult *downMigrationRecords = PQexec(connection,
-			"SELECT filename as up, replace(filename, '-up.sql', '-down.sql') as down"
-			" FROM pg_migrate"
-			" WHERE batch = ((SELECT max(batch) AS batch FROM pg_migrate));");
+			"SELECT filename AS up, replace(filename, '-up.sql', '-down.sql') AS down"
+			" FROM pgmigrate.manifest"
+			" WHERE batch = ((SELECT max(batch) AS batch FROM pgmigrate.manifest));");
 	if (PQresultStatus(downMigrationRecords) != PGRES_TUPLES_OK) {
 		cleanup(connection, downMigrationRecords);
 	}
@@ -289,7 +326,7 @@ int checkIfSetup(PGconn *connection) {
 	PGresult *isSetupRes = PQexec(connection,"SELECT CASE WHEN EXISTS ("
 			" SELECT 1"
 			" FROM information_schema.tables"
-			" WHERE table_name = 'pg_migrate'"
+			" WHERE table_name = 'manifest' AND table_schema = 'pg_migrate'"
 	") THEN 1 ELSE 0 END AS PROVISIONED;");
 
 	if (PQresultStatus(isSetupRes) != PGRES_TUPLES_OK) {
@@ -306,7 +343,8 @@ int checkIfSetup(PGconn *connection) {
 
 void setup(PGconn *connection) {
 	PGresult *checkIfProvisioned = PQexec(connection,
-			"CREATE TABLE pg_migrate ("
+			"CREATE SCHEMA pgmigrate;"
+			"CREATE TABLE pgmigrate.manifest ("
 					"filename       VARCHAR,"
 					"batch          INT,"
 	                "time_performed TIMESTAMP DEFAULT now()"
