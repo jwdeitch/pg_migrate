@@ -272,7 +272,15 @@ void rollbackMigrations(PGconn *connection, int should_simulate) {
 		if( access( downFilepath, F_OK ) == -1 ) {
 			printf("Skipping (file does not exists): %s\n", downFilepath);
 			if (should_simulate == 0) {
-				runRollbackFile(connection, upFilepath, downFilepath);
+
+			    /* How to handle missing down migrations on FS?
+			     * Safest way to ensure data integrity is to abort down migration all-together.
+			     * Previous to this change, pg_migrate would just continue as normal:
+			     *      runRollbackFile(connection, upFilepath, downFilepath);
+			     */
+
+                printf("Aborting rollback - can't rollback if you're missing: &s\n", downFilepath);
+                exit(1);
 			}
 			continue;
 		}
