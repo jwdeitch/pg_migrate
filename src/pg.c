@@ -279,7 +279,7 @@ void rollbackMigrations(PGconn *connection, int should_simulate) {
 			     *      runRollbackFile(connection, upFilepath, downFilepath);
 			     */
 
-                printf("Aborting rollback - can't rollback if you're missing: &s\n", downFilepath);
+                printf("Aborting rollback - can't rollback if you're missing: %s\n", downFilepath);
                 exit(1);
 			}
 			continue;
