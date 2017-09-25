@@ -334,7 +334,7 @@ int checkIfSetup(PGconn *connection) {
 	PGresult *isSetupRes = PQexec(connection,"SELECT CASE WHEN EXISTS ("
 			" SELECT 1"
 			" FROM information_schema.tables"
-			" WHERE table_name = 'manifest' AND table_schema = 'pg_migrate'"
+			" WHERE table_name = 'manifest' AND table_schema = 'pgmigrate'"
 	") THEN 1 ELSE 0 END AS PROVISIONED;");
 
 	if (PQresultStatus(isSetupRes) != PGRES_TUPLES_OK) {
