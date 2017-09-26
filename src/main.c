@@ -8,7 +8,7 @@
 #include "diff.h"
 
 void printHelp();
-const char *version = "1.0.4";
+const char *version = "1.0.5";
 
 int main(int argc, char *argv[]) {
 	extern char *optarg;
@@ -78,13 +78,13 @@ int main(int argc, char *argv[]) {
 				break;
 			case 'h':
 				printHelp();
-				exit(1);
+				return 0;
 		}
 	}
 
 	if (optind == 1) {
 		printHelp();
-		exit(1);
+		return 1;
 	}
 
 	if (H == 0) {
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 		}
 		setup(connection);
 		printf("Setup successful\n");
-		return 1;
+		return 0;
 	}
 
 	if (is_setup == 0) {
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 
 	if (s) {
 		getLatest(connection, 20);
-		return 1;
+		return 0;
 	}
 
 	if (u + d == 0) {
@@ -124,13 +124,13 @@ int main(int argc, char *argv[]) {
 
 	if (d) {
 		rollbackMigrations(connection, p);
-		return 1;
+		return 0;
 	}
 
 	if (u) {
 		if (argv[optind] == NULL) {
 			fprintf(stderr, "No directory provided\n");
-			exit(1);
+			return 1;
 		}
 		char *file = argv[optind];
 		char path[PATH_MAX];
@@ -138,15 +138,16 @@ int main(int argc, char *argv[]) {
 		DIR *dir = opendir(path);
 		if (!dir) {
 			fprintf(stderr, "No valid directory provided: %s\n", path);
-			exit(1);
+			return 1;
 		}
 		closedir(dir);
 		char **migrationToBeRan = missing_from_db(getMigrationsFromDb(connection), getMigrationsFromFs(path));
 		if (strcmp(migrationToBeRan[0], "\0") == 0) {
 			printf("Nothing to migrate\n");
-			return 1;
+			return 0;
 		}
 		runMigrations(connection, migrationToBeRan, p);
+		return 0;
 	}
 
 	return 1;
