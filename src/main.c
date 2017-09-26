@@ -108,8 +108,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (is_setup == 0) {
-		printf("ERROR: pg_migrate table not found in public schema\nRun `pg_migrate -H [host url] -g`\n");
-		return 2;
+		printf("ERROR: manifest table not found in pgmigrate schema\nRun `pg_migrate -H [host url] -g`\n");
+		return 1;
 	}
 
 	if (s) {
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 		realpath(file, path);
 		DIR *dir = opendir(path);
 		if (!dir) {
-			fprintf(stderr, "No valid directory provided %s\n", path);
+			fprintf(stderr, "No valid directory provided: %s\n", path);
 			exit(1);
 		}
 		closedir(dir);

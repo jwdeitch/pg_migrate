@@ -81,7 +81,7 @@ struct fs_discovered_migrations *getMigrationsFromFs(const char *dir) {
 		exit(1);
 	}
 	*itr = 0;
-	listdir(".", 15);
+	listdir(dir, 15);
 	strcpy(file_names_arr[*itr].name, "\0");
 	return file_names_arr;
 

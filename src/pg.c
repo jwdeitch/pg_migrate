@@ -222,7 +222,10 @@ void runMigrations(PGconn *connection, char **migrationsToBeRan, int should_simu
 			printf("Migrated: %s\n", migrationsToBeRan[i]);
 			free(fileContents);
 		} else {
-			printf("(simulated) Migrate: %s\n", migrationsToBeRan[i]);
+		    if (fsize == 0) {
+			    printf("(simulated) Skipping (file is empty): %s\n", migrationsToBeRan[i]);
+			}
+            printf("(simulated) Migrate: %s\n", migrationsToBeRan[i]);
 		}
 		i++;
 	}
@@ -320,6 +323,9 @@ void rollbackMigrations(PGconn *connection, int should_simulate) {
 			runRollbackFile(connection, upFilepath, downFilepath);
 			printf("Rolled back: %s\n", downFilepath);
 		} else {
+    		if (fsize == 0) {
+	    	    printf("(simulated) Skipping (file is empty): %s\n", downFilepath);
+    		}
 			printf("(simulated) Roll back: %s\n", downFilepath);
 		}
 	}
