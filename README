@@ -40,7 +40,7 @@ Download: https://github.com/jwdeitch/pg_migrate/releases/latest
 
 ** The release binaries are compiled against amd64 linux (ubuntu) and Apple OSX.
 
-Before first migration, you must provision the database by running pg_migrate with the -g and -H flags. This is to create the "pg_migrate.manifest" table, which stores information about which migrations have been ran:
+Before first migration, you must provision the database by running pg_migrate with the -g and -H flags. This is to create the "pgmigrate.manifest" table, which stores information about which migrations have been ran:
 > pg_migrate -H postgres://postgres:pass@localhost:5432 -g
 
 Notes
